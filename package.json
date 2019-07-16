@@ -1,0 +1,40 @@
+{
+  "name": "@cley_faye/react-utils",
+  "version": "0.1.0",
+  "description": "Some small utilities for React",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepack": "npx grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CleyFaye/react-utils.git"
+  },
+  "author": "Gabriel Paul \"Cley Faye\" Risterucci",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/CleyFaye/react-utils/issues"
+  },
+  "homepage": "https://github.com/CleyFaye/react-utils#readme",
+  "devDependencies": {
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
+    "@babel/preset-react": "^7.0.0",
+    "core-js": "^2.6.9",
+    "eslint": "^6.0.1",
+    "eslint-plugin-react": "^7.14.2",
+    "grunt": "^1.0.4",
+    "grunt-babel": "^8.0.0",
+    "grunt-contrib-clean": "^2.0.0",
+    "grunt-exec": "^3.0.0",
+    "load-grunt-tasks": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "16.x"
+  },
+  "files": [
+    "lib/**/*.js",
+    "es5/**/*.js"
+  ]
+}
