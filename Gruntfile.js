@@ -1,26 +1,26 @@
 /*eslint-env node */
 const loadGruntTasks = require("load-grunt-tasks");
 
-const ES5_DIR = "es5";
+const OUTPUT_DIR = "lib";
 
 module.exports = grunt => {
   loadGruntTasks(grunt);
 
   grunt.initConfig({
     clean: [
-      ES5_DIR,
+      OUTPUT_DIR,
     ],
     babel: {
       options: {
         sourceMap: true,
       },
-      es5: {
+      lib: {
         options: {
           presets: [
             [
               "@babel/preset-env",
               {
-                targets: "last 1 version, not dead",
+                targets: "last 1 version, > 2%, not dead",
                 modules: false,
                 useBuiltIns: "usage",
                 corejs: 2,
@@ -33,12 +33,12 @@ module.exports = grunt => {
           expand: true,
           cwd: "lib",
           src: "**/*.js",
-          dest: ES5_DIR,
+          dest: OUTPUT_DIR,
         }],
       },
     },
   });
 
-  grunt.registerTask("default", ["babel:es5"]);
-  grunt.registerTask("build", ["babel:es5"]);
+  grunt.registerTask("build", ["babel:lib"]);
+  grunt.registerTask("default", ["build"]);
 };
