@@ -20,6 +20,10 @@ module.exports = grunt => {
             [
               "@babel/preset-env",
               {
+                targets: "last 1 version, not dead",
+                modules: false,
+                useBuiltIns: "usage",
+                corejs: 2,
               },
             ],
             "@babel/preset-react",
@@ -36,4 +40,5 @@ module.exports = grunt => {
   });
 
   grunt.registerTask("default", ["babel:es5"]);
+  grunt.registerTask("build", ["babel:es5"]);
 };
