@@ -1,4 +1,7 @@
 # Dependency directories
 /node_modules
 
+# Packaged files
+/*.tgz
+
 # Output directory
