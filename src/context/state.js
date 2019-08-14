@@ -30,24 +30,29 @@ export default (name, initialValues) =>
 {
   const contextStateName = contextNameToStateName(name);
   const context = createContext({
-    value: initialValues,
+    ...initialValues,
     update: () => {},
   });
 
-  /** Create the actual context value stored in an object's state */
-  const init = stateRef => ({
-    value: Object.assign({}, initialValues),
-    update: newValue => promiseUpdateState(
-      stateRef,
-      {
-        [contextStateName]: newValue,
-      }),
-  });
+  /** Create the actual context value stored in an object's state.
+   * 
+   * Must be called in the component's constructor.
+   */
+  const init = stateRef => {
+    stateRef.state[contextStateName] = {
+      ...Object.assign({}, initialValues),
+      update: newValue => promiseUpdateState(
+        stateRef,
+        {
+          [contextStateName]: newValue,
+        }),
+    };
+  };
 
   /** Provider that pick the state from the provided state value */
   const StateProvider = props => {
     const Provider = context.Provider;
-    return <Provider value={props.stateRef}>
+    return <Provider value={props.stateRef.state[contextStateName]}>
       {props.children}
     </Provider>;
   };
@@ -55,15 +60,6 @@ export default (name, initialValues) =>
     stateRef: PropTypes.instanceOf(React.Component),
     children: PropTypes.node,
   };
-
-  /** Construct a Provider built on a given instance state.
-   * 
-   * This is needed to actually update the rendered components when the state
-   * update and to keep it easy to use by not having to explicitely reference
-   * the state field used.
-   */
-  const provide = instance =>
-    <StateProvider stateRef={instance.state[contextStateName]} />;
 
   /** Functional component to automatically provide a Context in another
    * Component's props.
@@ -85,6 +81,5 @@ export default (name, initialValues) =>
     Provider: StateProvider,
     init,
     withCtx,
-    provide,
   };
 };
