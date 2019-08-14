@@ -31,7 +31,7 @@ module.exports = grunt => {
         },
         files: [{
           expand: true,
-          cwd: "lib",
+          cwd: "src",
           src: "**/*.js",
           dest: OUTPUT_DIR,
         }],
