@@ -44,7 +44,11 @@ export default (name, initialValues) =>
       update: newValue => promiseUpdateState(
         stateRef,
         {
-          [contextStateName]: newValue,
+          [contextStateName]: Object.assign(
+            {},
+            stateRef.state[contextStateName],
+            newValue
+          ),
         }),
     };
   };
