@@ -39,6 +39,10 @@ export default (name, initialValues) =>
    * Must be called in the component's constructor.
    */
   const init = stateRef => {
+    // Object might not have a state defined
+    if (stateRef.state === undefined) {
+      stateRef.state = {};
+    }
     stateRef.state[contextStateName] = {
       ...Object.assign({}, initialValues),
       update: newValue => promiseUpdateState(
