@@ -39,7 +39,7 @@ export default (instance, formFields) => {
     }
     return Promise.all(listToValidate.map(key =>
       // Done to be able to mix up direct return and promises
-      Promise.all([formFields[key]()]).then(
+      Promise.all([formFields[key](instance.state[key])]).then(
         res => promiseUpdateState(instance, {[errorName(key)]: res[0] || null}))
     )).then(
       () => Object.keys(formFields).reduce(
