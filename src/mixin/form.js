@@ -8,6 +8,8 @@ const errorName = fieldName => `${fieldName}Error`;
  * This will automatically call changeHandler() on the same instance to handle
  * fields update.
  * 
+ * A resetValidation() method can be used to clear all error messages.
+ * 
  * @param {Component} instance
  * Instance of the component that handle the form fields.
  * The state will change like this:
@@ -37,6 +39,10 @@ export default (instance, formFields) => {
     if (listToValidate === undefined) {
       listToValidate = Object.keys(formFields);
     }
+    if (instance._lockValidation) {
+      instance._lockValidation = false;
+      return Promise.resolve(false);
+    }
     return Promise.all(listToValidate.map(key =>
       // Done to be able to mix up direct return and promises
       Promise.all([formFields[key](instance.state[key])]).then(
@@ -64,5 +70,16 @@ export default (instance, formFields) => {
       []
     );
     return instance.validateForm(listToValidate);
+  };
+  instance.resetValidation = () => {
+    instance._lockValidation = true;
+    return promiseUpdateState(instance, {
+      ...Object.keys(formFields).reduce(
+        (acc, fieldName) => {
+          acc[errorName(fieldName)] = null;
+          return acc;
+        },
+        {})
+    });
   };
 };
