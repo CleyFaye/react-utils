@@ -41,8 +41,12 @@ export const contextNameToStateName = contextName =>
  * - To update a value on the component, you can call its `update()` method
  *   roughly the same way you'd call `setState()`, except that it returns a
  *   promise.
+ * - To make it easier, it is possible to bind custom functions to the state;
+ *   these function can reference the current context using `this` (so they can
+ *   update it using `this.update()`). To do so provide an object with name as
+ *   keys and functions as values as the `functionsToBind` argument.
  */
-export default (name, initialValues) =>
+export default (name, initialValues, functionsToBind) =>
 {
   const contextStateName = contextNameToStateName(name);
   const context = createContext({
@@ -71,6 +75,10 @@ export default (name, initialValues) =>
           ),
         }),
     };
+    const stateObj = stateRef.state[contextStateName];
+    // Bind functions
+    Object.keys(functionsToBind || {}).forEach(functionName =>
+      stateObj[functionName].bind(stateObj));
   };
 
   /** Provider that pick the state from the provided state value */
