@@ -1,3 +1,4 @@
+/*eslint-env node */
 /******************************************************************************
  * @preserve
  * @cley_faye/react-utils - small set of React utilities
@@ -25,6 +26,83 @@ import {promiseUpdateState} from "../mixin/exstate";
 export const contextNameToStateName = contextName =>
   `${contextName}Ctx`;
 
+/** Populate the initial value (when no provider is available) with default
+ * values and empty functions.
+ */
+const computeRealInitialValue = (initialValues, functionsToBind) => ({
+  ...initialValues,
+  ...Object.keys(functionsToBind).reduce((acc, cur) => {
+    acc[cur] = () => {};
+    return acc;
+  }, {}),
+  update: () => {},
+});
+
+/** Create the actual context value stored in an object's state.
+ * 
+ * Must be called in the component's constructor.
+ */
+const createInitFunction = (
+  contextStateName,
+  initialValues,
+  functionsToBind
+) => stateRef => {
+  // Object might not have a state defined
+  if (stateRef.state === undefined) {
+    stateRef.state = {};
+  }
+  stateRef.state[contextStateName] = {
+    ...Object.assign({}, initialValues),
+    // Bind functions
+    ...Object.keys(functionsToBind || {}).reduce((acc, functionName) => {
+      acc[functionName] = (...args) => functionsToBind[functionName](
+        stateRef.state[contextStateName],
+        ...args);
+      return acc;
+    }, {}),
+    update: newValue => promiseUpdateState(
+      stateRef,
+      {
+        [contextStateName]: Object.assign(
+          {},
+          stateRef.state[contextStateName],
+          newValue
+        ),
+      }),
+  };
+  console.log("Initialized with ", stateRef.state);
+};
+
+/** Provider that pick the state from the provided state value */
+const createStateProvider = (context, contextStateName) => {
+  const StateProvider = props => {
+    const Provider = context.Provider;
+    return <Provider value={props.stateRef.state[contextStateName]}>
+      {props.children}
+    </Provider>;
+  };
+  StateProvider.propTypes = {
+    stateRef: PropTypes.instanceOf(React.Component),
+    children: PropTypes.node,
+  };
+  return StateProvider;
+};
+
+/** Functional component to automatically provide a Context in another
+ * Component's props.
+ */
+const createWithCtx = (context, contextStateName) => Compo => {
+  const ConsumerWrapper = props => {
+    const Consumer = context.Consumer;
+    return <Consumer>
+      {ctx => <Compo
+        {...props}
+        {...{[contextStateName]: ctx}} />}
+    </Consumer>;
+  };
+  return ConsumerWrapper;
+};
+
 /** Create a Context that is backed by a Component's state.
  * 
  * How to use this:
@@ -42,76 +120,39 @@ export const contextNameToStateName = contextName =>
  *   roughly the same way you'd call `setState()`, except that it returns a
  *   promise.
  * - To make it easier, it is possible to bind custom functions to the state;
- *   these function can reference the current context using `this` (so they can
- *   update it using `this.update()`). To do so provide an object with name as
- *   keys and functions as values as the `functionsToBind` argument.
+ *   these function can reference the current context using their first argument
+ *   (so they can update it using `arg.update()`). To do so provide an object
+ *   with name as keys and functions as values as the `functionsToBind`
+ *   argument.
  */
 export default (name, initialValues, functionsToBind) =>
 {
   const contextStateName = contextNameToStateName(name);
-  const context = createContext({
-    ...initialValues,
-    update: () => {},
-  });
+  const contextInitialValue = computeRealInitialValue(
+    initialValues,
+    functionsToBind);
+  console.log(
+    "Creating context ",
+    name,
+    " with initial value ",
+    contextInitialValue);
+  const context = createContext(contextInitialValue);
 
-  /** Create the actual context value stored in an object's state.
-   * 
-   * Must be called in the component's constructor.
-   */
-  const init = stateRef => {
-    // Object might not have a state defined
-    if (stateRef.state === undefined) {
-      stateRef.state = {};
-    }
-    stateRef.state[contextStateName] = {
-      ...Object.assign({}, initialValues),
-      update: newValue => promiseUpdateState(
-        stateRef,
-        {
-          [contextStateName]: Object.assign(
-            {},
-            stateRef.state[contextStateName],
-            newValue
-          ),
-        }),
-    };
-    const stateObj = stateRef.state[contextStateName];
-    // Bind functions
-    Object.keys(functionsToBind || {}).forEach(functionName =>
-      stateObj[functionName].bind(stateObj));
-  };
-
-  /** Provider that pick the state from the provided state value */
-  const StateProvider = props => {
-    const Provider = context.Provider;
-    return <Provider value={props.stateRef.state[contextStateName]}>
-      {props.children}
-    </Provider>;
-  };
-  StateProvider.propTypes = {
-    stateRef: PropTypes.instanceOf(React.Component),
-    children: PropTypes.node,
-  };
-
-  /** Functional component to automatically provide a Context in another
-   * Component's props.
-   */
-  const withCtx = Compo => {
-    const ConsumerWrapper = props => {
-      const Consumer = context.Consumer;
-      return <Consumer>
-        {ctx => <Compo
-          {...props}
-          {...{[contextStateName]: ctx}} />}
-      </Consumer>;
-    };
-    return ConsumerWrapper;
-  };
 
   return {
     Consumer: context.Consumer,
-    Provider: StateProvider,
-    init,
-    withCtx,
+    Provider: createStateProvider(
+      context,
+      contextStateName
+    ),
+    init: createInitFunction(
+      contextStateName,
+      initialValues,
+      functionsToBind
+    ),
+    withCtx: createWithCtx(
+      context,
+      contextStateName
+    )
   };
 };
