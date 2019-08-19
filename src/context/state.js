@@ -25,7 +25,23 @@ import {promiseUpdateState} from "../mixin/exstate";
 export const contextNameToStateName = contextName =>
   `${contextName}Ctx`;
 
-/** Create a Context that is backed by a Component's state */
+/** Create a Context that is backed by a Component's state.
+ * 
+ * How to use this:
+ * - Create a file somewhere (usually in `/context`) named after your context
+ *   (for example `user.js`)
+ * - In this file, export the return value from this function (`retval`)
+ * - To create a state provider in a component you have to call the init()
+ *   method in its constructor (`retval.init(this)`)
+ * - During render, you have to render a component from `retval.Provider` with
+ *   the appropriate prop set (`<retval.Provider stateRef={this} />`)
+ * - For consumer, either use the `retval.Consumer` class as a regular context,
+ *   or wrap your component with `retval.withCtx(CompClass)`. In the second case
+ *   a prop named `<contextName>Ctx` will be provided.
+ * - To update a value on the component, you can call its `update()` method
+ *   roughly the same way you'd call `setState()`, except that it returns a
+ *   promise.
+ */
 export default (name, initialValues) =>
 {
   const contextStateName = contextNameToStateName(name);
