@@ -70,7 +70,6 @@ const createInitFunction = (
         ),
       }),
   };
-  console.log("Initialized with ", stateRef.state);
 };
 
 /** Provider that pick the state from the provided state value */
@@ -131,11 +130,6 @@ export default (name, initialValues, functionsToBind) =>
   const contextInitialValue = computeRealInitialValue(
     initialValues,
     functionsToBind);
-  console.log(
-    "Creating context ",
-    name,
-    " with initial value ",
-    contextInitialValue);
   const context = createContext(contextInitialValue);
 
 
