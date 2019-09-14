@@ -22,7 +22,11 @@
  * }
  * @endcode
  */
-export default instance =>
+export default instance => {
   instance.changeHandler = fieldName => event => {
     instance.setState({[fieldName]: event.target.value});
   };
+  instance.changeCheckboxHandler = fieldName => event => {
+    instance.setState({[fieldName]: event.target.checked});
+  };
+};
