@@ -99,6 +99,9 @@ const createWithCtx = (context, contextStateName) => Compo => {
         {...{[contextStateName]: ctx}} />}
     </Consumer>;
   };
+  if (Compo.navigationOptions) {
+    ConsumerWrapper.navigationOptions = Compo.navigationOptions;
+  }
   return ConsumerWrapper;
 };
 
