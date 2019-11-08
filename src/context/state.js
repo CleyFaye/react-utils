@@ -129,6 +129,9 @@ const createWithCtx = (context, contextStateName) => Compo => {
  */
 export default (name, initialValues, functionsToBind) =>
 {
+  if (!functionsToBind) {
+    functionsToBind = {};
+  }
   const contextStateName = contextNameToStateName(name);
   const contextInitialValue = computeRealInitialValue(
     initialValues,
