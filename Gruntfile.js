@@ -23,7 +23,7 @@ module.exports = grunt => {
                 targets: "last 1 version, > 2%, not dead",
                 modules: false,
                 useBuiltIns: "usage",
-                corejs: 2,
+                corejs: 3,
               },
             ],
             "@babel/preset-react",

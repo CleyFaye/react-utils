@@ -19,7 +19,7 @@
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
-    "core-js": "^2.6.9",
+    "core-js": "^3.4.5",
     "eslint": "^6.2.2",
     "eslint-plugin-react": "^7.14.3",
     "grunt": "^1.0.4",
