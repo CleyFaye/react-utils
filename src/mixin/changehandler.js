@@ -3,10 +3,6 @@
  * @param {Component} instance
  * The object whose state must be updated
  * 
- * @return {function(stateName: string): function}
- * A function that can be used to create onChange event handler.
- * These functions will update the state value.
- * 
  * @sample How to use
  * @begincode
  * class MyComp extends React.Component {
@@ -15,9 +11,14 @@
  *     changeHandler(this);
  *   }
  *   render() {
- *     return <SomeInput
- *       value={this.state.fieldName}
- *       onChange={this.changeHandler("fieldName")} />
+ *     return <>
+ *       <SomeInput
+ *         value={this.state.fieldName}
+ *         onChange={this.changeHandler("fieldName")} />
+ *       <Checkbox
+ *         checked={this.state.checkField}
+ *         onChange={this.changeCheckboxHandler("checkField")} />
+ *     </>;
  *   }
  * }
  * @endcode
