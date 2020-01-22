@@ -46,12 +46,9 @@ export const promiseUpdateState = (instance, newValue) => new Promise(resolve =>
  * Initial value of the state. Used both in initialisation and for reset.
  */
 export default (instance, initialValue) => {
-  if (instance.state === undefined) {
-    instance.state = {};
-  }
   if (initialValue !== undefined) {
     instance._initialState = Object.assign({}, initialValue);
-    instance.state = Object.assign(instance.state, instance._initialState);
+    instance.state = Object.assign(instance.state || {}, instance._initialState);
   }
   instance.updateState = newValue => promiseUpdateState(instance, newValue);
   instance.resetState = () => instance.updateState(instance._initialState);
