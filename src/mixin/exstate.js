@@ -37,19 +37,21 @@ export const promiseUpdateState = (instance, newValue) => new Promise(resolve =>
  * 
  * It will add two methods to the instance:
  * - updateState(newValue): return a promise that resolve when the state updated
- * - resetState(): reset state values to initialValue
+ * - resetState(): reset state values to initialValue (only if one is provided)
  * 
  * @param {Component} instance
  * The instance of Component to extend
  * 
- * @param {Object} initialValue
+ * @param {Object} [initialValue]
  * Initial value of the state. Used both in initialisation and for reset.
+ * If not provided, no change is done to the state of the object, and the
+ * resetState() method will not work.
  */
 export default (instance, initialValue) => {
   if (initialValue !== undefined) {
     instance._initialState = Object.assign({}, initialValue);
     instance.state = Object.assign(instance.state || {}, instance._initialState);
+    instance.resetState = () => instance.updateState(instance._initialState);
   }
   instance.updateState = newValue => promiseUpdateState(instance, newValue);
-  instance.resetState = () => instance.updateState(instance._initialState);
 };
