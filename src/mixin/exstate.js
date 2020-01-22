@@ -28,10 +28,10 @@
  * parameter the old value and return the new value.
  * 
  * @return {Promise<void>}
- * A promise that resolve when the state is updated.
+ * A promise that resolve after the state is updated.
  */
 export const promiseUpdateState = (instance, newValue) => new Promise(resolve =>
-  instance.setState(newValue, () => resolve()));
+  instance.setState(newValue, resolve));
 
 /** Extend an instance of Component with Promise-based state handling.
  * 
