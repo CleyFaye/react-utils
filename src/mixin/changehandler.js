@@ -2,13 +2,20 @@
  * 
  * The following methods are added to an instance:
  * - changeHandler()
- * - changeCheckboxHandler()
  * 
  * The event source must have a name property, as it is used to know which field
  * to update.
  * 
  * @param {Component} instance
  * The object whose state must be updated
+ * 
+ * @param {string} eventType
+ * Default to "DOM" (also, currently the only supported value).
+ * Determine where we look for field names and values.
+ * In DOM:
+ * - name is taken from "event.target.name"
+ * - value is taken from "event.target.value" (or event.target.checked for
+ *   checkbox)
  * 
  * @sample How to use
  * @begincode
@@ -32,11 +39,18 @@
  * }
  * @endcode
  */
-export default instance => {
-  instance.changeHandler = event => {
-    instance.setState({[event.target.name]: event.target.value});
-  };
-  instance.changeCheckboxHandler = event => {
-    instance.setState({[event.target.name]: event.target.checked});
-  };
+export default (instance, eventType = "DOM") => {
+  if (eventType === "DOM") {
+    instance.changeHandler = event => {
+      let value;
+      if (event.target.type === "checkbox") {
+        value = event.target.checked;
+      } else {
+        value = event.target.value;
+      }
+      instance.setState({[event.target.name]: value});
+    };
+  } else {
+    throw new Error(`Unknown event type ${eventType}`);
+  }
 };
