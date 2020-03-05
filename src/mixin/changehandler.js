@@ -33,7 +33,7 @@
  *       <Checkbox
  *         name="checkField"
  *         checked={this.state.checkField}
- *         onChange={this.changeCheckboxHandler} />
+ *         onChange={this.changeHandler} />
  *     </>;
  *   }
  * }
