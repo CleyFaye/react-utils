@@ -1,7 +1,6 @@
 /** Add a changeHandler() method to an instance.
- * 
- * The following methods are added to an instance:
- * - changeHandler()
+ *
+ * An alias named "handleChange" is also added for convenience.
  * 
  * The event source must have a name property, as it is used to know which field
  * to update.
@@ -50,6 +49,7 @@ export default (instance, eventType = "DOM") => {
       }
       instance.setState({[event.target.name]: value});
     };
+    instance.handleChange = instance.changeHandler;
   } else {
     throw new Error(`Unknown event type ${eventType}`);
   }
