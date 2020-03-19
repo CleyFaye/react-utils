@@ -92,14 +92,17 @@ const createStateProvider = (context, contextStateName) => {
  * Component's props.
  */
 const createWithCtx = (context, contextStateName) => Compo => {
-  const ConsumerWrapper = props => {
+  const ConsumerWrapper = React.forwardRef((props, ref) => {
     const Consumer = context.Consumer;
     return <Consumer>
       {ctx => <Compo
+        ref={ref}
         {...props}
         {...{[contextStateName]: ctx}} />}
     </Consumer>;
-  };
+  });
+  ConsumerWrapper.displayName = "ConsumerWrapper";
+  // TODO this should be more generic
   if (Compo.navigationOptions) {
     ConsumerWrapper.navigationOptions = Compo.navigationOptions;
   }
