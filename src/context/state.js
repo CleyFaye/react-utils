@@ -46,13 +46,14 @@ const createInitFunction = (
   contextStateName,
   initialValues,
   functionsToBind
-) => stateRef => {
+) => (stateRef, initialValuesOverride) => {
   // Object might not have a state defined
   if (stateRef.state === undefined) {
     stateRef.state = {};
   }
   stateRef.state[contextStateName] = {
-    ...Object.assign({}, initialValues),
+    ...initialValues,
+    ...initialValuesOverride,
     // Bind functions
     ...Object.keys(functionsToBind || {}).reduce((acc, functionName) => {
       acc[functionName] = (...args) => functionsToBind[functionName](
