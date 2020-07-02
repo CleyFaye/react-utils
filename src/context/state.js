@@ -65,7 +65,6 @@ const createInitFunction = (
       stateRef,
       {
         [contextStateName]: Object.assign(
-          {},
           stateRef.state[contextStateName],
           newValue
         ),
