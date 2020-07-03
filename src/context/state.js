@@ -61,14 +61,19 @@ const createInitFunction = (
         ...args);
       return acc;
     }, {}),
-    update: newValue => promiseUpdateState(
-      stateRef,
-      {
-        [contextStateName]: Object.assign(
-          stateRef.state[contextStateName],
-          newValue
-        ),
-      }),
+    update: async(newValue) => {
+      const newCtxValue = Object.assign(
+        {},
+        stateRef.state[contextStateName],
+        newValue,
+      );
+      await promiseUpdateState(
+        stateRef,
+        {
+          [contextStateName]: newCtxValue,
+        });
+      return newCtxValue;
+    },
   };
 };
 
@@ -123,7 +128,9 @@ const createWithCtx = (context, contextStateName) => Compo => {
  *   a prop named `<contextName>Ctx` will be provided.
  * - To update a value on the component, you can call its `update()` method
  *   roughly the same way you'd call `setState()`, except that it returns a
- *   promise.
+ *   promise. The promise resolve with the new context value.
+ *   In case you want to to multiple calls to the same context object, you must
+ *   use the updated value each time.
  * - To make it easier, it is possible to bind custom functions to the state;
  *   these function can reference the current context using their first argument
  *   (so they can update it using `arg.update()`). To do so provide an object
