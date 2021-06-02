@@ -1,5 +1,15 @@
 /*eslint-env node */
 const loadGruntTasks = require("load-grunt-tasks");
+const {readFileSync} = require("fs");
+
+const license = [
+  "/**",
+  " * @preserve",
+  " * @license",
+  ...readFileSync("LICENSE", "utf8").split("\n")
+    .map(c => ` * ${c}`),
+  " */",
+].join("\n");
 
 const OUTPUT_DIR = "lib";
 
@@ -37,8 +47,21 @@ module.exports = grunt => {
         }],
       },
     },
+    usebanner: {
+      options: {banner: license},
+      lib: {
+        files: [{
+          expand: true,
+          cwd: OUTPUT_DIR,
+          src: "**/*.js",
+        }],
+      },
+    },
   });
 
-  grunt.registerTask("build", ["babel:lib"]);
+  grunt.registerTask("build", [
+    "babel:lib",
+    "usebanner:lib",
+  ]);
   grunt.registerTask("default", ["build"]);
 };
