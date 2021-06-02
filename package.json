@@ -34,8 +34,7 @@
     "react": "17.x"
   },
   "files": [
-    "lib/**/*",
-    "!**/*.map"
+    "lib/**/*.js"
   ],
   "dependencies": {}
 }
