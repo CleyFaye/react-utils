@@ -2,8 +2,7 @@ import React, {createContext} from "react";
 import PropTypes from "prop-types";
 import {promiseUpdateState} from "../mixin/exstate";
 
-export const contextNameToStateName = contextName =>
-  `${contextName}Ctx`;
+export const contextNameToStateName = contextName => `${contextName}Ctx`;
 
 /** Populate the initial value (when no provider is available) with default
  * values and empty functions.
@@ -18,13 +17,13 @@ const computeRealInitialValue = (initialValues, functionsToBind) => ({
 });
 
 /** Create the actual context value stored in an object's state.
- * 
+ *
  * Must be called in the component's constructor.
  */
 const createInitFunction = (
   contextStateName,
   initialValues,
-  functionsToBind
+  functionsToBind,
 ) => (stateRef, initialValuesOverride) => {
   // Object might not have a state defined
   if (stateRef.state === undefined) {
@@ -37,20 +36,20 @@ const createInitFunction = (
     ...Object.keys(functionsToBind || {}).reduce((acc, functionName) => {
       acc[functionName] = (...args) => functionsToBind[functionName](
         stateRef.state[contextStateName],
-        ...args);
+        ...args,
+      );
       return acc;
     }, {}),
-    update: async(newValue) => {
-      const newCtxValue = Object.assign(
-        {},
-        stateRef.state[contextStateName],
-        newValue,
-      );
+    update: async newValue => {
+      const newCtxValue = {
+
+        ...stateRef.state[contextStateName],
+        ...newValue,
+      };
       await promiseUpdateState(
         stateRef,
-        {
-          [contextStateName]: newCtxValue,
-        });
+        {[contextStateName]: newCtxValue},
+      );
       return newCtxValue;
     },
   };
@@ -64,9 +63,10 @@ const createStateProvider = (context, contextStateName) => {
       {props.children}
     </Provider>;
   };
+  StateProvider.displayName = "StateProvider";
   StateProvider.propTypes = {
-    stateRef: PropTypes.instanceOf(React.Component),
-    children: PropTypes.node,
+    stateRef: PropTypes.instanceOf(React.Component).isRequired,
+    children: PropTypes.node.isRequired,
   };
   return StateProvider;
 };
@@ -81,7 +81,8 @@ const createWithCtx = (context, contextStateName) => Compo => {
       {ctx => <Compo
         ref={ref}
         {...props}
-        {...{[contextStateName]: ctx}} />}
+        {...{[contextStateName]: ctx}}
+      />}
     </Consumer>;
   });
   ConsumerWrapper.displayName = "ConsumerWrapper";
@@ -93,7 +94,7 @@ const createWithCtx = (context, contextStateName) => Compo => {
 };
 
 /** Create a Context that is backed by a Component's state.
- * 
+ *
  * How to use this:
  * - Create a file somewhere (usually in `/context`) named after your context
  *   (for example `user.js`)
@@ -116,32 +117,31 @@ const createWithCtx = (context, contextStateName) => Compo => {
  *   with name as keys and functions as values as the `functionsToBind`
  *   argument.
  */
-export default (name, initialValues, functionsToBind) =>
-{
-  if (!functionsToBind) {
-    functionsToBind = {};
-  }
+export default (name, initialValues, functionsToBindDef) => {
+  const functionsToBind = functionsToBindDef
+    ? functionsToBindDef
+    : {};
   const contextStateName = contextNameToStateName(name);
   const contextInitialValue = computeRealInitialValue(
     initialValues,
-    functionsToBind);
+    functionsToBind,
+  );
   const context = createContext(contextInitialValue);
-
 
   return {
     Consumer: context.Consumer,
     Provider: createStateProvider(
       context,
-      contextStateName
+      contextStateName,
     ),
     init: createInitFunction(
       contextStateName,
       initialValues,
-      functionsToBind
+      functionsToBind,
     ),
     withCtx: createWithCtx(
       context,
-      contextStateName
-    )
+      contextStateName,
+    ),
   };
 };

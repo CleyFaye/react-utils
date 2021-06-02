@@ -4,25 +4,25 @@ import {promiseUpdateState} from "./exstate";
 const errorName = fieldName => `${fieldName}Error`;
 
 /** Add functions to handle form validation.
- * 
+ *
  * This will automatically call changeHandler() on the same instance to handle
  * fields update.
- * 
+ *
  * A resetValidation() method can be used to clear all error messages.
- * 
+ *
  * @param {Component} instance
  * Instance of the component that handle the form fields.
  * The state will change like this:
  * - properties named after the field will hold the actual value
  * - properties named `${fieldName}Error` will either hold an error string to
  *   display to the user, or null if the field validated successfuly
- * 
+ *
  * To perform form validation, call the validateForm() method on the instance.
  * It returns a Promise that resolve with either true (all fields are valid) or
  * false (some failed validation).
  * To perform live validation, call validateUpdate() from componentDidUpdate()
  * and pass prevState as the first argument.
- * 
+ *
  * @param {Object} formFields
  * A key-value mapping, where keys are field name and value are the validation
  * function for that field.
@@ -30,23 +30,25 @@ const errorName = fieldName => `${fieldName}Error`;
  * validation fail, nothing otherwise.
  * Validation functions can be promises.
  */
+// eslint-disable-next-line max-lines-per-function
 export default (instance, formFields) => {
   changeHandler(instance);
   Object.keys(formFields).forEach(fieldName => {
     instance.state[errorName(fieldName)] = null;
   });
-  instance.validateForm = listToValidate => {
-    if (listToValidate === undefined) {
-      listToValidate = Object.keys(formFields);
-    }
+  instance.validateForm = listToValidateDef => {
+    const listToValidate = listToValidateDef === undefined
+      ? Object.keys(formFields)
+      : listToValidateDef;
     if (instance._lockValidation) {
       instance._lockValidation = false;
       return Promise.resolve(false);
     }
-    return Promise.all(listToValidate.map(key =>
+    return Promise.all(listToValidate.map(
       // Done to be able to mix up direct return and promises
-      Promise.all([formFields[key](instance.state[key])]).then(
-        res => promiseUpdateState(instance, {[errorName(key)]: res[0] || null}))
+      key => Promise.all([formFields[key](instance.state[key])]).then(
+        res => promiseUpdateState(instance, {[errorName(key)]: res[0] || null}),
+      ),
     )).then(
       () => Object.keys(formFields).reduce(
         (acc, key) => {
@@ -55,19 +57,19 @@ export default (instance, formFields) => {
           }
           return acc;
         },
-        true
-      )
+        true,
+      ),
     );
   };
   instance.validateUpdate = prevState => {
     const listToValidate = Object.keys(formFields).reduce(
       (fieldsList, key) => {
-        if (prevState[key] != instance.state[key]) {
+        if (prevState[key] !== instance.state[key]) {
           fieldsList.push(key);
         }
         return fieldsList;
       },
-      []
+      [],
     );
     return instance.validateForm(listToValidate);
   };
@@ -79,7 +81,8 @@ export default (instance, formFields) => {
           acc[errorName(fieldName)] = null;
           return acc;
         },
-        {})
+        {},
+      ),
     });
   };
 };

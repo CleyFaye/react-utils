@@ -1,4 +1,4 @@
-/*eslint-env node */
+/* eslint-env node */
 const loadGruntTasks = require("load-grunt-tasks");
 const {readFileSync} = require("fs");
 
@@ -21,9 +21,7 @@ module.exports = grunt => {
       OUTPUT_DIR,
     ],
     babel: {
-      options: {
-        sourceMap: true,
-      },
+      options: {sourceMap: true},
       lib: {
         options: {
           presets: [

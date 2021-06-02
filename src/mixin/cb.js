@@ -6,7 +6,7 @@
  * - cbValue(): call of optional callback that can be either a function that
  *              returns a promise, a function that returns a value, or a value.
  *              In any case returns the final value.
- * 
+ *
  * Calling cb(someFunc, arg1, arg2) will call someFunc(arg1, arg2) if someFunc
  * is set, and do nothing otherwise.
  * Similar rules applies to cbProm() and cbValue().

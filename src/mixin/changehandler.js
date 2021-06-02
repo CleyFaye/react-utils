@@ -16,13 +16,13 @@ const handlerTypes = {
 /** Add a changeHandler() method to an instance.
  *
  * An alias named "handleChange" is also added for convenience.
- * 
+ *
  * The event source must have a name property, as it is used to know which field
  * to update.
- * 
+ *
  * @param {Component} instance
  * The object whose state must be updated
- * 
+ *
  * @param {string|object} eventType
  * Default to "DOM" (also, currently the only supported value).
  * Determine where we look for field names and values.
@@ -33,7 +33,7 @@ const handlerTypes = {
  * It is possible to pass an object with two function asproperties: getName()
  * and getValue(). In this case, these functions will be called with all the
  * arguments from onChange.
- * 
+ *
  * @sample How to use
  * @begincode
  * class MyComp extends React.Component {
