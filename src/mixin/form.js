@@ -20,8 +20,6 @@ const errorName = fieldName => `${fieldName}Error`;
  * To perform form validation, call the validateForm() method on the instance.
  * It returns a Promise that resolve with either true (all fields are valid) or
  * false (some failed validation).
- * To perform live validation, call validateUpdate() from componentDidUpdate()
- * and pass prevState as the first argument.
  *
  * @param {Object} formFields
  * A key-value mapping, where keys are field name and value are the validation
@@ -32,7 +30,9 @@ const errorName = fieldName => `${fieldName}Error`;
  */
 // eslint-disable-next-line max-lines-per-function
 export default (instance, formFields) => {
-  changeHandler(instance);
+  if (!instance.changeHandler) {
+    changeHandler(instance);
+  }
   Object.keys(formFields).forEach(fieldName => {
     instance.state[errorName(fieldName)] = null;
   });
@@ -73,6 +73,17 @@ export default (instance, formFields) => {
     );
     return instance.validateForm(listToValidate);
   };
+  if (instance.componentDidUpdate) {
+    const originalUpdate = instance.componentDidUpdate.bind(instance);
+    instance.componentDidUpdate = (prevProps, prevState, ...extraArgs) => {
+      instance.validateUpdate(prevState);
+      originalUpdate(prevProps, prevState, ...extraArgs);
+    };
+  } else {
+    instance.componentDidUpdate = (prevProps, prevState) => {
+      instance.validateUpdate(prevState);
+    };
+  }
   instance.resetValidation = () => {
     instance._lockValidation = true;
     return promiseUpdateState(instance, {
