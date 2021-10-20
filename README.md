@@ -66,6 +66,8 @@ The `updateState()` and `resetState()` are promise-based.
 In particular, only use `updateState()` when you want to wait for the new state to be applied.
 Otherwise use the regular `setState()`, as it will allow state change merge as usual.
 
+As a warning, be very mindful of where you use `updateState()`, as it will not only prevent the usual state change merge from React, but also implies that you're running asynchronous code that depend on the state, meaning that the state might change unexpectedly.
+
 ### Callback helpers
 Provide some methods to call a props-provided callback for some usual cases.
 
@@ -203,6 +205,61 @@ Note that calling `formMixin()` will call `changeHandlerMixin()` if it was not c
 
 Some validators are provided, but custom validators can be provided as simple functions that takes
 the value as input and return/resolve with an error message if something's wrong.
+
+### Asynchronous triggers
+Provides a unified way to trigger a callback after a given delay.
+
+Some usages is refreshing user data with polling, or pooling keystrokes for auto completion.
+
+Async triggers are automatically canceled when a component is unmounted, and their trigger function can be called multiple time, resulting in only one call after the final delay is expired.
+
+#### Full asynchronous triggers example
+
+```JavaScript
+import asyncTriggerMixin from "@cley_faye/react-utils/lib/mixin/asynctrigger.js";
+
+class SomeComp extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      list: [],
+      searchString: "",
+    };
+    asyncTriggerMixin(this);
+    this.registerAsyncTrigger(
+      "updateList",
+      this.asyncTriggerUpdateList.bind(this),
+      500,
+    );
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  componentDidUpdate(oldProps, oldState) {
+    if (oldState.searchString !== this.state.searchString) {
+      this.asyncTrigger("updateList");
+    }
+  }
+
+  handleChange(ev) {
+    this.setState({searchString: ev.target.value});
+  }
+
+  asyncTriggerUpdateList() {
+    // Do some network requests or something
+    getUpdatedList(this.state.searchString)
+      .then(list => {
+        this.setState({list});
+      });
+  }
+
+  render() {
+    return <>
+      <input onChange={this.handleChange} />
+      <List values={this.state.list} />
+    </>;
+  }
+}
+```
 
 Context management
 ------------------
