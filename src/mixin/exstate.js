@@ -29,7 +29,7 @@ export const promiseUpdateState = (
  * If not provided, no change is done to the state of the object, and the
  * resetState() method will not work.
  */
-export default (instance, initialValue) => {
+const exStateMixin = (instance, initialValue) => {
   if (initialValue !== undefined) {
     instance._initialState = {...initialValue};
     instance.state = Object.assign(instance.state || {}, instance._initialState);
@@ -37,3 +37,5 @@ export default (instance, initialValue) => {
   }
   instance.updateState = newValue => promiseUpdateState(instance, newValue);
 };
+
+export default exStateMixin;

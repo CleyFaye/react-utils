@@ -11,7 +11,7 @@
  * is set, and do nothing otherwise.
  * Similar rules applies to cbProm() and cbValue().
  */
-export default instance => {
+const cbMixin = instance => {
   instance.cb = (cbFunc, ...args) => {
     if (!cbFunc) {
       return;
@@ -35,3 +35,5 @@ export default instance => {
     return Promise.resolve(cbFunc);
   };
 };
+
+export default cbMixin;

@@ -1,5 +1,5 @@
-import changeHandler from "./changehandler";
-import {promiseUpdateState} from "./exstate";
+import changeHandler from "./changehandler.js";
+import {promiseUpdateState} from "./exstate.js";
 
 const errorName = fieldName => `${fieldName}Error`;
 
@@ -29,7 +29,7 @@ const errorName = fieldName => `${fieldName}Error`;
  * Validation functions can be promises.
  */
 // eslint-disable-next-line max-lines-per-function
-export default (instance, formFields) => {
+const formMixin = (instance, formFields) => {
   if (!instance.changeHandler) {
     changeHandler(instance);
   }
@@ -97,3 +97,5 @@ export default (instance, formFields) => {
     });
   };
 };
+
+export default formMixin;

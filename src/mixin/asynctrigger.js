@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import {hookLifeCycle} from "../utils/method";
+import {hookLifeCycle} from "../utils/method.js";
 
 const createRegisterAsyncTrigger = instance => (name, callback, delayInMs) => {
   instance._cfAsyncTriggers[name] = {

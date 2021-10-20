@@ -1,6 +1,6 @@
 /* eslint-env node */
-const loadGruntTasks = require("load-grunt-tasks");
 const {readFileSync} = require("fs");
+const loadGruntTasks = require("load-grunt-tasks");
 
 const license = [
   "/**",

@@ -56,7 +56,7 @@ const handlerTypes = {
  * }
  * @endcode
  */
-export default (instance, eventType = "DOM") => {
+const changeHandlerMixin = (instance, eventType = "DOM") => {
   const handler = typeof eventType === "string"
     ? handlerTypes[eventType]
     : eventType;
@@ -73,3 +73,5 @@ export default (instance, eventType = "DOM") => {
   };
   instance.handleChange = instance.changeHandler;
 };
+
+export default changeHandlerMixin;

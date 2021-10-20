@@ -1,6 +1,6 @@
 import React, {createContext} from "react";
 import PropTypes from "prop-types";
-import {promiseUpdateState} from "../mixin/exstate";
+import {promiseUpdateState} from "../mixin/exstate.js";
 
 export const contextNameToStateName = contextName => `${contextName}Ctx`;
 
@@ -117,7 +117,7 @@ const createWithCtx = (context, contextStateName) => Compo => {
  *   with name as keys and functions as values as the `functionsToBind`
  *   argument.
  */
-export default (name, initialValues, functionsToBindDef) => {
+const createContextState = (name, initialValues, functionsToBindDef) => {
   const functionsToBind = functionsToBindDef
     ? functionsToBindDef
     : {};
@@ -145,3 +145,5 @@ export default (name, initialValues, functionsToBindDef) => {
     ),
   };
 };
+
+export default createContextState;
