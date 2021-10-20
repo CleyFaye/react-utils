@@ -44,7 +44,7 @@ const createComponentDidMount = instance => () => {
 const createComponentWillUnmount = instance => () => {
   instance._cfAsyncMounted = false;
   for (const triggerName of Object.keys(instance._cfAsyncTriggers)) {
-    instance.cancel(triggerName);
+    instance.asyncTriggerCancel(triggerName);
   }
 };
 
