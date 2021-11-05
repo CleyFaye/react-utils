@@ -274,7 +274,7 @@ Here's a basic full example:
 import stateContext from "@cley_faye/react-utils/lib/context/state.js";
 
 const doLogin = (ctx, login) => {
-  return ctx.update({login});
+  return ctx.setContext({login});
 }
 
 export default stateContext(
@@ -324,3 +324,13 @@ The actual content is stored in the component's state.
 
 A special case has been made to pass static properties when using `withCtx()`.
 For now it only passes a static property named `navigationOptions` if it exists.
+
+Updating the content of a context is done with either the `setContext()` method, or the `update()`
+method.
+Both takes as input the new values, in a similar way to `setState()`.
+However, since they change the effective context object in the parent state, they also return the
+new context object to use if you need to chain multiple calls.
+The `update()` method is promise-based and is discouraged because it can lead to side-effects.
+
+When defining functions to put in a context (as described above) it is advisable to only perform
+one update at the end of the function.

@@ -42,7 +42,6 @@ const createInitFunction = (
     }, {}),
     update: async newValue => {
       const newCtxValue = {
-
         ...stateRef.state[contextStateName],
         ...newValue,
       };
@@ -50,6 +49,14 @@ const createInitFunction = (
         stateRef,
         {[contextStateName]: newCtxValue},
       );
+      return newCtxValue;
+    },
+    setContext: newValue => {
+      const newCtxValue = {
+        ...stateRef.state[contextStateName],
+        ...newValue,
+      };
+      stateRef.setState({[contextStateName]: newCtxValue});
       return newCtxValue;
     },
   };
@@ -106,11 +113,15 @@ const createWithCtx = (context, contextStateName) => Compo => {
  * - For consumer, either use the `retval.Consumer` class as a regular context,
  *   or wrap your component with `retval.withCtx(CompClass)`. In the second case
  *   a prop named `<contextName>Ctx` will be provided.
- * - To update a value on the component, you can call its `update()` method
- *   roughly the same way you'd call `setState()`, except that it returns a
- *   promise. The promise resolve with the new context value.
+ * - To update a value on the component, you can call its `setContext()` method
+ *   roughly the same way you'd call `setState()`.
+ *   Alternatively it is possible to call `update()` the same way, except that
+ *   it returns a promise. The promise resolve with the new context value.
  *   In case you want to to multiple calls to the same context object, you must
  *   use the updated value each time.
+ *   Be aware that using `update()` can lead to many side effects, including
+ *   the component's state and mounting state being changed. It is advised that
+ *   context's functions only do one update as their last step.
  * - To make it easier, it is possible to bind custom functions to the state;
  *   these function can reference the current context using their first argument
  *   (so they can update it using `arg.update()`). To do so provide an object
