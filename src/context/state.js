@@ -81,7 +81,10 @@ const createStateProvider = (context, contextStateName) => {
 /** Functional component to automatically provide a Context in another
  * Component's props.
  */
-const createWithCtx = (context, contextStateName) => Compo => {
+const createWithCtx = (context, contextStateName) => (
+  Compo,
+  passStatics = ["navigationOptions"],
+) => {
   const ConsumerWrapper = React.forwardRef((props, ref) => {
     const Consumer = context.Consumer;
     return <Consumer>
@@ -93,9 +96,10 @@ const createWithCtx = (context, contextStateName) => Compo => {
     </Consumer>;
   });
   ConsumerWrapper.displayName = "ConsumerWrapper";
-  // TODO this should be more generic
-  if (Compo.navigationOptions) {
-    ConsumerWrapper.navigationOptions = Compo.navigationOptions;
+  for (const staticName of passStatics) {
+    if (Compo[staticName]) {
+      ConsumerWrapper[staticName] = Compo[staticName];
+    }
   }
   return ConsumerWrapper;
 };
