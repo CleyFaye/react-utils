@@ -40,9 +40,13 @@ const createInitFunction = (
       );
       return acc;
     }, {}),
-    update: async newValue => {
+    update: async newValueRaw => {
+      const oldValue = stateRef.state[contextStateName];
+      const newValue = typeof newValueRaw === "function"
+        ? await newValueRaw(oldValue)
+        : newValueRaw;
       const newCtxValue = {
-        ...stateRef.state[contextStateName],
+        ...oldValue,
         ...newValue,
       };
       await promiseUpdateState(
@@ -51,9 +55,13 @@ const createInitFunction = (
       );
       return newCtxValue;
     },
-    setContext: newValue => {
+    setContext: newValueRaw => {
+      const oldValue = stateRef.state[contextStateName];
+      const newValue = typeof newValueRaw === "function"
+        ? newValueRaw(oldValue)
+        : newValueRaw;
       const newCtxValue = {
-        ...stateRef.state[contextStateName],
+        ...oldValue,
         ...newValue,
       };
       stateRef.setState({[contextStateName]: newCtxValue});
