@@ -16,6 +16,21 @@ const computeRealInitialValue = (initialValues, functionsToBind) => ({
   update: () => {},
 });
 
+const createSetContext = (stateRef, contextStateName) => newValueRaw => {
+  stateRef.setState(oldState => {
+    const oldValue = oldState[contextStateName];
+    const newValue = typeof newValueRaw === "function"
+      ? newValueRaw(oldValue)
+      : newValueRaw;
+    return {
+      [contextStateName]: {
+        ...oldValue,
+        ...newValue,
+      },
+    };
+  });
+};
+
 /** Create the actual context value stored in an object's state.
  *
  * Must be called in the component's constructor.
@@ -55,18 +70,7 @@ const createInitFunction = (
       );
       return newCtxValue;
     },
-    setContext: newValueRaw => {
-      const oldValue = stateRef.state[contextStateName];
-      const newValue = typeof newValueRaw === "function"
-        ? newValueRaw(oldValue)
-        : newValueRaw;
-      const newCtxValue = {
-        ...oldValue,
-        ...newValue,
-      };
-      stateRef.setState({[contextStateName]: newCtxValue});
-      return newCtxValue;
-    },
+    setContext: createSetContext(stateRef, contextStateName),
   };
 };
 
