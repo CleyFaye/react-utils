@@ -4,5 +4,9 @@
 # Packaged files
 /*.tgz
 
+# Build files
+/build
+/.tsbuildinfo
+
 # Output directory
 /lib

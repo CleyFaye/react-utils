@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "skipLibCheck": true,
+    "target": "ES2021",
+    "module": "ESNEXT",
+    "jsx": "react-native",
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": true,
+    "outDir": "./build",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    "removeComments": false,
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
+}

@@ -12,7 +12,9 @@ const license = [
 ].join("\n");
 
 const OUTPUT_DIR = "lib";
+const TSBUILD_DIR = "build";
 
+// eslint-disable-next-line max-lines-per-function
 module.exports = grunt => {
   loadGruntTasks(grunt);
 
@@ -28,7 +30,7 @@ module.exports = grunt => {
             [
               "@babel/preset-env",
               {
-                targets: "last 1 version, > 2%, not dead",
+                targets: "> 2% and not dead",
                 modules: false,
                 useBuiltIns: "usage",
                 corejs: 3,
@@ -39,10 +41,16 @@ module.exports = grunt => {
         },
         files: [{
           expand: true,
-          cwd: "src",
+          cwd: TSBUILD_DIR,
           src: "**/*.js",
           dest: OUTPUT_DIR,
         }],
+      },
+    },
+    run: {
+      tsbuild: {
+        cmd: "npx",
+        args: ["tsc"],
       },
     },
     usebanner: {
@@ -58,6 +66,7 @@ module.exports = grunt => {
   });
 
   grunt.registerTask("build", [
+    "run:tsbuild",
     "babel:lib",
     "usebanner:lib",
   ]);
