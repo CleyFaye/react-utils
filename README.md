@@ -17,97 +17,23 @@ npm install @cley_faye/react-utils
 Use using direct imports:
 
 ```JavaScript
-import exStateMixin from "@cley_faye/react-utils/lib/mixin/exstate.js";
+import changeHandlerMixin from "@cley_faye/react-utils/lib/mixin/changehandler.js";
 
 class SomeComp extends React.Component {
   constructor(props) {
     super(props);
-    exStateMixin(this, {some: "value"});
+    this.handleChange = changeHandlerMixin(this);
   }
 }
 ```
 
 Mixins
 ------
-The mixins provided are used by calling them in a component's constructor. They will add some
-functions and properties to the instance.
-
-### Extended state
-Provide some extra way to manipulate the state and gives a promise-based way to wait for a state
-to apply.
-
-#### Full extended state example
-
-```JavaScript
-import exStateMixin from "@cley_faye/react-utils/lib/mixin/exstate.js";
-
-class SomeComp extends React.Component {
-  constructor(props) {
-    super(props);
-    exStateMixin(this, {some: "value"});
-  }
-
-  handleChange(newValue) {
-    this.setState({some: newValue});
-  }
-
-  handleResetState() {
-    this.resetState().then(() => console.log("State reset"));
-  }
-
-  handleAsyncChange(newValue) {
-    this.updateState({some: newValue}).then(() => console.log("state change applied"));
-  }
-}
-```
-
-#### Extended state details
-The `updateState()` and `resetState()` are promise-based.
-In particular, only use `updateState()` when you want to wait for the new state to be applied.
-Otherwise use the regular `setState()`, as it will allow state change merge as usual.
-
-As a warning, be very mindful of where you use `updateState()`, as it will not only prevent the usual state change merge from React, but also implies that you're running asynchronous code that depend on the state, meaning that the state might change unexpectedly.
-
-### Callback helpers
-Provide some methods to call a props-provided callback for some usual cases.
-
-#### Full callback example
-
-```JavaScript
-import cbMixin from "@cley_faye/react-utils/lib/mixin/cb.js";
-
-class SomeComp extends React.Component {
-  constructor(props) {
-    super(props);
-    cbMixin(this);
-  }
-
-  handleSimpleCallback() {
-    this.cb(this.props.directFunc, "someparam");
-  }
-
-  handlePromiseCB() {
-    this.cbProm(this.props.promiseFunc, "someparam").then(() => console.log("done"));
-  }
-
-  handleValueCB() {
-    this.cbValue(this.props.value).then(value => console.log(value));
-  }
-}
-```
-
-#### Callback details
-All three functions handles the case of an undefined value (by silently returning undefined).
-`cbProm()` can use either a function that returns a `Promise` or not, in both case it will resolve
-to a `Promise`.
-
-The `cbValue()` methods allows providing either a value or a function in the prop.
-In the case of a function, it can either directly return the value or return a promise that resolve
-with the expected value.
-In all cases, `cbValue()` will return the value.
+The mixins provided are used by calling them in a component's constructor.
+They return a function or an object and are usually set as properties of the component.
 
 ### Change handler
-Provides a generic `handleChange()` function to pass to component's `onChange` prop.
+Provides a generic function to handle `onChange` events.
 
 #### Change handler example
 
@@ -118,7 +44,7 @@ class SomeComp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {someVal: ""};
-    changeHandlerMixin(this);
+    this.handleChange = changeHandlerMixin(this);
   }
 
   render() {
@@ -147,7 +73,7 @@ update the state, and the value to use.
 Here's an exemple that mimic the DOM handler:
 
 ```JavaScript
-changeHandlerMixin(
+this.handleDOMChange = changeHandlerMixin(
   this,
   {
     getName: ev => ev.target.name,
@@ -172,7 +98,7 @@ class SomeComp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {textField: ""};
-    formMixin(
+    this.validateForm = formMixin(
       this,
       {
         textField: notEmpty("Can not be empty"),
@@ -201,17 +127,20 @@ class SomeComp extends React.Component {
 ```
 
 #### Form fields details
-Note that calling `formMixin()` will call `changeHandlerMixin()` if it was not called beforehand.
+Some validators are provided by the library, but custom validators can be provided as simple
+functions that takes the value as input and return/resolve with an error message if something's
+wrong.
 
-Some validators are provided, but custom validators can be provided as simple functions that takes
-the value as input and return/resolve with an error message if something's wrong.
+Using the form mixin will hook into `componentDidUpdate()` to update field errors when they are
+updated.
 
 ### Asynchronous triggers
 Provides a unified way to trigger a callback after a given delay.
 
 Some usages is refreshing user data with polling, or pooling keystrokes for auto completion.
 
-Async triggers are automatically canceled when a component is unmounted, and their trigger function can be called multiple time, resulting in only one call after the final delay is expired.
+Async triggers are automatically canceled when a component is unmounted, and their trigger function
+can be called multiple time, resulting in only one call after the final delay is expired.
 
 #### Full asynchronous triggers example
 
@@ -225,9 +154,8 @@ class SomeComp extends React.Component {
       list: [],
       searchString: "",
     };
-    asyncTriggerMixin(this);
-    this.registerAsyncTrigger(
-      "updateList",
+    this.updateListTrigger = asyncTriggerMixin(
+      this,
       this.asyncTriggerUpdateList.bind(this),
       500,
     );
@@ -236,7 +164,7 @@ class SomeComp extends React.Component {
 
   componentDidUpdate(oldProps, oldState) {
     if (oldState.searchString !== this.state.searchString) {
-      this.asyncTrigger("updateList");
+      this.updateListTrigger.trigger();
     }
   }
 
@@ -263,7 +191,6 @@ class SomeComp extends React.Component {
 
 Context management
 ------------------
-
 A single helper to manage context values through a "main" component state is provided.
 It provides a convenient way to plug into the React state update propagation with contexts.
 
@@ -323,14 +250,12 @@ It is possible to add custom initial values for a context as the second argument
 The actual content is stored in the component's state.
 
 A special case has been made to pass static properties when using `withCtx()`.
-For now it only passes a static property named `navigationOptions` if it exists.
+If a second argument is provided to `withCtx()`, it must be a list of strings representing the
+static properties from the base component to replicate on the returned proxy.
 
-Updating the content of a context is done with either the `setContext()` method, or the `update()`
-method.
-Both takes as input the new values, in a similar way to `setState()`.
-However, since they change the effective context object in the parent state, they also return the
-new context object to use if you need to chain multiple calls.
-The `update()` method is promise-based and is discouraged because it can lead to side-effects.
+Updating the content of a context is done with either the `setContext()` method.
+It takes as input the new values, in a similar way to `setState()`.
 
-When defining functions to put in a context (as described above) it is advisable to only perform
-one update at the end of the function.
+When defining functions to put in a context (as described above) care must be taken to not overwrite
+the context with outdated value, by providing a function that receive the old value, as you'd do
+with `setState()`.
