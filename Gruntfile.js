@@ -53,6 +53,16 @@ module.exports = grunt => {
         args: ["tsc"],
       },
     },
+    copy: {
+      tslib: {
+        files: [{
+          expand: true,
+          cwd: TSBUILD_DIR,
+          src: "**/*.d.ts",
+          dest: OUTPUT_DIR,
+        }],
+      },
+    },
     usebanner: {
       options: {banner: license},
       lib: {
@@ -69,6 +79,7 @@ module.exports = grunt => {
     "run:tsbuild",
     "babel:lib",
     "usebanner:lib",
+    "copy:tslib",
   ]);
   grunt.registerTask("default", ["build"]);
 };

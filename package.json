@@ -34,6 +34,7 @@
     "grunt-babel": "^8.0.0",
     "grunt-banner": "^0.6.0",
     "grunt-contrib-clean": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0",
     "grunt-run": "^0.8.1",
     "load-grunt-tasks": "^5.1.0",
     "typescript": "^4.6.4"
@@ -42,7 +43,8 @@
     "react": "17.x || 18.x"
   },
   "files": [
-    "lib/**/*.js"
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
   ],
   "dependencies": {
     "prop-types": "^15.7.2"
