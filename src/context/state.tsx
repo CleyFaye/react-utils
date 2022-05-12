@@ -6,14 +6,14 @@ type UpdateFunc<Data> = (prevData: Readonly<Data>) => Partial<Data>;
 
 export const contextNameToStateName = (contextName: string): string => `${contextName}Ctx`;
 
-export interface ContextBuiltin<Data extends Record<string, unknown>> {
+export interface ContextBuiltin<Data> {
   /** Update the context content. Behave similarly to setState() */
-  setContext: (data: UpdateFunc<Data>) => void;
+  setContext: (data: UpdateFunc<Data> | Partial<Data>) => void;
 }
 
 export type Context<
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 > = Data
 & Functions
 & ContextBuiltin<Data>;
@@ -23,8 +23,8 @@ export type Context<
  * functions.
  */
 const computeRealInitialValue = <
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 >(
   initialValues: Partial<Data>,
   functionsToBind: Partial<Functions>,
@@ -38,15 +38,15 @@ const computeRealInitialValue = <
 }) as unknown as Context<Data, Functions>;
 
 const createSetContext = <
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 >(
   stateRef: Component<unknown, Record<string, Context<Data, Functions>>>,
   contextStateName: string,
-) => (newValueRaw: UpdateFunc<Data> | Data) => {
+) => (newValueRaw: UpdateFunc<Data> | Partial<Data>) => {
   stateRef.setState(oldState => {
     const oldValue = oldState[contextStateName];
-    const newValue = typeof newValueRaw === "function"
+    const newValue = newValueRaw instanceof Function
       ? newValueRaw(oldValue)
       : newValueRaw;
     return {
@@ -64,12 +64,12 @@ const createSetContext = <
  * Must be called in the component's constructor.
  */
 const createInitFunction = <
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 >(
   contextStateName: string,
   initialValues: Data,
-  functionsToBind?: Functions,
+  functionsToBind?: Record<keyof Functions, Function>,
 ) => (
   stateRef: Component<
   unknown,
@@ -86,10 +86,12 @@ const createInitFunction = <
     // Bind functions
     ...Object.keys(functionsToBind ?? {}).reduce<Record<string, Function>>((acc, functionName) => {
       if (!functionsToBind) throw new Error("Unexpected state");
+      const functionToBind = (functionsToBind as unknown as Record<string, Function>)[functionName];
+      if (!(functionToBind instanceof Function)) throw new Error("Only functions can be used");
       acc[functionName] = (
         ...args: Array<unknown>
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      ) => functionsToBind[functionName](stateRef.state[contextStateName], ...args);
+      ) => functionToBind(stateRef.state[contextStateName], ...args);
       return acc;
     }, {}),
     setContext: createSetContext(stateRef, contextStateName),
@@ -98,8 +100,8 @@ const createInitFunction = <
 
 /** Provider that pick the state from the provided state value */
 const createStateProvider = <
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 >(
   context: React.Context<Context<Data, Functions>>,
   contextStateName: string,
@@ -127,14 +129,14 @@ const createStateProvider = <
  * Component's props.
  */
 const createWithCtx = <
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 >(
   context: React.Context<Context<Data, Functions>>,
   contextStateName: string,
 ) => (
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Compo: React.ComponentClass,
+  // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-explicit-any
+  Compo: React.ComponentClass<any>,
   passStatics = ["navigationOptions"],
 ) => {
   const consumerWrapper = React.forwardRef<Component>((props, ref) => {
@@ -160,8 +162,8 @@ const createWithCtx = <
 };
 
 export interface StateContext<
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 > {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Consumer: React.Consumer<Context<Data, Functions>>;
@@ -177,7 +179,8 @@ export interface StateContext<
     >,
     initialValuesOverride?: Partial<Data>,
   ) => void;
-  withCtx: (compo: React.ComponentClass, passStatics?: Array<string>) =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  withCtx: (compo: React.ComponentClass<any>, passStatics?: Array<string>) =>
   React.ForwardRefExoticComponent<React.RefAttributes<Component>>;
 }
 
@@ -203,12 +206,12 @@ export interface StateContext<
  *   argument.
  */
 const createContextState = <
-  Data extends Record<string, unknown>,
-  Functions extends Record<string, Function>
+  Data,
+  Functions
 >(
   name: string,
   initialValues: Data,
-  functionsToBindDef?: Functions,
+  functionsToBindDef?: Record<keyof Functions, Function>,
 ): StateContext<Data, Functions> => {
   const functionsToBind = functionsToBindDef
     ? functionsToBindDef
