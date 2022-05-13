@@ -10,7 +10,7 @@ interface AsyncTriggerComponentExt extends Component {
 }
 
 /** Allow multiple calls to trigger() to trigger a callback after a set delay. */
-class AsyncTrigger {
+export class AsyncTrigger {
   private instance: AsyncTriggerComponentExt;
   private callback: () => void;
   private delayInMs: number;
@@ -27,7 +27,7 @@ class AsyncTrigger {
   }
 
   /** Trigger (or rearm) the delay, then call the callback */
-  public trigger() {
+  public trigger(): void {
     if (!this.instance._cfAsyncTrigger) throw new Error("Unexpected state");
     if (!this.instance._cfAsyncTrigger.mounted) {
       console.error("Calling `trigger()` on an unmounted component is ignored and might indicate a memory leak");
@@ -40,7 +40,7 @@ class AsyncTrigger {
   }
 
   /** Cancel the trigger. Can be called multiple time without consequences. */
-  public cancel() {
+  public cancel(): void {
     if (this.timeout !== null) {
       clearTimeout(this.timeout);
       this.timeout = null;
