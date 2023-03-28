@@ -80,6 +80,7 @@ const registerAsyncTrigger = (
         if (!instanceRec._cfAsyncTrigger) throw new Error("Unexpected state");
         instanceRec._cfAsyncTrigger.mounted = true;
       },
+      true,
     );
     hookLifeCycle(
       instance,
