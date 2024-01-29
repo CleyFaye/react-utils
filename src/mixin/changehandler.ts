@@ -1,11 +1,11 @@
 import {Component} from "react";
 
-export interface HandlerType {
-  getName: (...args: Array<unknown>) => string;
-  getValue: (...args: Array<unknown>) => unknown;
+export interface HandlerType<EventArgs extends Array<unknown>> {
+  getName: (...args: EventArgs) => string;
+  getValue: (...args: EventArgs) => unknown;
 }
 
-export type HandlerTypes = Record<string, HandlerType>;
+export type HandlerTypes = Record<string, HandlerType<Array<unknown>>>;
 
 /**
  * All the method acceptable for eventType must match a handler
@@ -72,15 +72,15 @@ const handlerTypes: HandlerTypes = {
  * }
  * @endcode
  */
-const changeHandlerMixin = (
+const changeHandlerMixin = <EventArgs extends Array<unknown>>(
   instance: Component,
-  eventType: "DOM" | HandlerType = "DOM",
+  eventType: "DOM" | HandlerType<EventArgs> = "DOM",
 // eslint-disable-next-line @typescript-eslint/ban-types
-): Function => {
+): (...args: EventArgs) => void => {
   const handler = typeof eventType === "string"
     ? handlerTypes[eventType]
     : eventType;
-  return (...args: Array<unknown>) => {
+  return (...args: EventArgs) => {
     const name = handler.getName(...args);
     const value = handler.getValue(...args);
     instance.setState({[name]: value});
