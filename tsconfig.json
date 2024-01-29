@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
-    "incremental": true,
+    "incremental": false,
+    "composite": false,
+    "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "target": "ES2021",
-    "module": "ESNEXT",
+    "target": "es2022",
+    "module": "nodenext",
     "jsx": "react-native",
     "declaration": true,
     "declarationMap": false,
     "sourceMap": true,
     "outDir": "./build",
     "rootDir": "./src",
-    "tsBuildInfoFile": "./.tsbuildinfo",
     "removeComments": false,
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true
   },
   "include": [
