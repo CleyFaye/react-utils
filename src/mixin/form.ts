@@ -41,7 +41,7 @@ const formMixin = (
   formFields: Fields,
 ): ValidatorFunc => {
   const instanceRec = instance as Component<unknown, Record<string, unknown>> & {
-    state: Record<string, unknown>,
+    state: Record<string, unknown>;
     _cfForm?: {
       locked: boolean;
       fields: Fields;
@@ -57,9 +57,7 @@ const formMixin = (
     instanceRec.state[errorName(fieldName)] = null;
   });
   const validateForm = async (listToValidateDef?: Array<string>) => {
-    const listToValidate = listToValidateDef === undefined
-      ? Object.keys(formFields)
-      : listToValidateDef;
+    const listToValidate = listToValidateDef ?? Object.keys(formFields);
     if (!instanceRec._cfForm) throw new Error("Unexpected state");
     if (instanceRec._cfForm.locked) {
       instanceRec._cfForm.locked = false;
@@ -99,7 +97,7 @@ const formMixin = (
 
 export const resetValidation = (instance: Component): void => {
   const instanceRec = instance as Component<unknown, Record<string, unknown>> & {
-    state: Record<string, unknown>,
+    state: Record<string, unknown>;
     _cfForm?: {
       locked: boolean;
       fields: Fields;

@@ -107,8 +107,8 @@ const createStateProvider = <
   contextStateName: string,
 ) => {
   const stateProvider: React.FunctionComponent<{
-    stateRef: Component<unknown, Record<string, Context<Data, Functions>>>,
-    children: React.ReactNode
+    stateRef: Component<unknown, Record<string, Context<Data, Functions>>>;
+    children: React.ReactNode;
   }> = props => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const Provider = context.Provider;
@@ -169,8 +169,8 @@ export interface StateContext<
   Consumer: React.Consumer<Context<Data, Functions>>;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Provider: React.FunctionComponent<{
-    stateRef: Component<unknown, Record<string, Context<Data, Functions>>>,
-    children: React.ReactNode
+    stateRef: Component<unknown, Record<string, Context<Data, Functions>>>;
+    children: React.ReactNode;
   }>;
   init: (
     stateRef: Component<

@@ -6,7 +6,7 @@ interface AsyncTriggerComponentExt extends Component {
   _cfAsyncTrigger?: {
     mounted: boolean;
     triggers: Array<AsyncTrigger>;
-  }
+  };
 }
 
 /** Allow multiple calls to trigger() to trigger a callback after a set delay. */

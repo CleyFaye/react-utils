@@ -19,18 +19,19 @@
   },
   "homepage": "https://github.com/CleyFaye/react-utils#readme",
   "devDependencies": {
-    "@babel/core": "^7.21.3",
-    "@babel/preset-env": "^7.20.2",
-    "@babel/preset-react": "^7.18.6",
-    "@keeex/eslint-config": "^1.9.3",
-    "@types/react": "^17.0.54",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
-    "core-js": "^3.29.1",
-    "eslint": "^8.36.0",
-    "eslint-plugin-import": "^2.27.5",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "@keeex/eslint-config": "^1.11.5",
+    "@types/react": "^17.0.75",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "core-js": "^3.35.1",
+    "eslint": "^8.56.0",
+    "eslint-plugin-deprecation": "^2.0.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react": "^7.33.2",
     "grunt": "^1.6.1",
     "grunt-babel": "^8.0.0",
     "grunt-banner": "^0.6.0",
@@ -38,10 +39,10 @@
     "grunt-contrib-copy": "^1.0.0",
     "grunt-run": "^0.8.1",
     "load-grunt-tasks": "^5.1.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
-    "react": "17.x||18.x"
+    "react": "^18.2.0"
   },
   "files": [
     "lib/**/*.js",
