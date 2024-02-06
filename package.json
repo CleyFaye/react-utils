@@ -1,6 +1,6 @@
 {
   "name": "@cley_faye/react-utils",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Some small utilities for React",
   "scripts": {
     "prepack": "npx grunt clean build",
