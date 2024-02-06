@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import React, {Component, createContext} from "react";
+import React, {
+  Component,
+  ComponentType,
+  createContext,
+} from "react";
 import PropTypes from "prop-types";
 
 type UpdateFunc<Data> = (prevData: Readonly<Data>) => Partial<Data>;
@@ -13,7 +17,7 @@ export interface ContextBuiltin<Data> {
 
 export type Context<
   Data,
-  Functions
+  Functions = Record<string, never>,
 > = Data
 & Functions
 & ContextBuiltin<Data>;
@@ -39,22 +43,24 @@ const computeRealInitialValue = <
 
 const createSetContext = <
   Data,
-  Functions
+  Functions,
+  CtxProp extends {[key in keyof CtxProp]: Context<Data, Functions>},
+  State,
 >(
-  stateRef: Component<unknown, Record<string, Context<Data, Functions>>>,
+  stateRef: Component<unknown, State & CtxProp>,
   contextStateName: string,
 ) => (newValueRaw: UpdateFunc<Data> | Partial<Data>) => {
   stateRef.setState(oldState => {
-    const oldValue = oldState[contextStateName];
+    const oldValue = oldState[contextStateName as keyof CtxProp];
     const newValue = newValueRaw instanceof Function
       ? newValueRaw(oldValue)
       : newValueRaw;
     return {
-      [contextStateName]: {
+      [contextStateName as keyof CtxProp]: {
         ...oldValue,
         ...newValue,
       },
-    };
+    } as unknown as (State & CtxProp);
   });
 };
 
@@ -65,37 +71,44 @@ const createSetContext = <
  */
 const createInitFunction = <
   Data,
-  Functions
+  Functions,
+  CtxProp,
 >(
   contextStateName: string,
   initialValues: Data,
   functionsToBind?: Record<keyof Functions, Function>,
-) => (
+) => <State,>(
   stateRef: Component<
   unknown,
-  Record<string, Context<Data, Functions>>>,
+  State
+  >,
   initialValuesOverride?: Partial<Data>,
 ) => {
-  const stateRefRec
-    = stateRef as Partial<Component<unknown, Record<string, Context<Data, Functions>>>>
-    & {state?: Record<string, Context<Data, Functions>>};
-  if (stateRefRec.state === undefined) stateRefRec.state = {};
-  stateRefRec.state[contextStateName] = {
-    ...initialValues,
-    ...initialValuesOverride,
-    // Bind functions
-    ...Object.keys(functionsToBind ?? {}).reduce<Record<string, Function>>((acc, functionName) => {
-      if (!functionsToBind) throw new Error("Unexpected state");
-      const functionToBind = (functionsToBind as unknown as Record<string, Function>)[functionName];
-      if (!(functionToBind instanceof Function)) throw new Error("Only functions can be used");
-      acc[functionName] = (
-        ...args: Array<unknown>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      ) => functionToBind(stateRef.state[contextStateName], ...args);
-      return acc;
-    }, {}),
-    setContext: createSetContext(stateRef, contextStateName),
-  } as unknown as Context<Data, Functions>;
+  // const stateRefRec
+  //   = stateRef as Partial<Component<unknown, State & CtxProp>>;
+  stateRef.state = {
+    ...stateRef.state,
+    [contextStateName]: {
+      ...initialValues,
+      ...initialValuesOverride,
+      // Bind functions
+      ...Object.keys(
+        functionsToBind ?? {},
+      ).reduce<Record<string, Function>>((acc, functionName) => {
+        if (!functionsToBind) throw new Error("Unexpected state");
+        const functionToBind
+          = (functionsToBind as unknown as Record<string, Function>)[functionName];
+        if (!(functionToBind instanceof Function)) throw new Error("Only functions can be used");
+        acc[functionName] = (
+          ...args: Array<unknown>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        ) => functionToBind((stateRef as Component<unknown, State & CtxProp>)
+          .state[contextStateName as keyof CtxProp], ...args);
+        return acc;
+      }, {}),
+      setContext: createSetContext(stateRef, contextStateName),
+    },
+  };
 };
 
 /** Provider that pick the state from the provided state value */
@@ -130,26 +143,29 @@ const createStateProvider = <
  */
 const createWithCtx = <
   Data,
-  Functions
+  Functions,
+  CtxProp extends {[key in keyof CtxProp]: Context<Data, Functions>},
 >(
   context: React.Context<Context<Data, Functions>>,
   contextStateName: string,
-) => (
+) => <Props,>(
   // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-explicit-any
-  Compo: React.ComponentClass<any>,
+  Compo: React.ComponentType<Props & CtxProp>,
   passStatics = ["navigationOptions"],
 ) => {
-  const consumerWrapper = React.forwardRef<Component>((props, ref) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const Consumer = context.Consumer;
-    return <Consumer>
-      {ctx => <Compo
-        ref={ref}
-        {...props}
-        {...{[contextStateName]: ctx}}
-      />}
-    </Consumer>;
-  });
+  const consumerWrapper = React.forwardRef<ComponentType<Props>, Props & CtxProp>(
+    (props, ref) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const Consumer = context.Consumer;
+      return <Consumer>
+        {ctx => <Compo
+          ref={ref}
+          {...props}
+          {...{[contextStateName]: ctx}}
+        />}
+      </Consumer>;
+    },
+  );
   consumerWrapper.displayName = "ConsumerWrapper";
   const compoRec = Compo as unknown as Record<string, unknown>;
   const consumerRec = consumerWrapper as unknown as Record<string, unknown>;
@@ -158,30 +174,37 @@ const createWithCtx = <
       consumerRec[staticName] = compoRec[staticName];
     }
   }
-  return consumerWrapper;
+  return consumerWrapper as
+  React.ForwardRefExoticComponent<React.PropsWithoutRef<
+  Omit<Props, keyof CtxProp>> & React.RefAttributes<React.ComponentType<Omit<Props, keyof CtxProp>>
+  >>;
 };
 
 export interface StateContext<
   Data,
-  Functions
+  Functions,
+  CtxProp,
 > {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Consumer: React.Consumer<Context<Data, Functions>>;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Provider: React.FunctionComponent<{
-    stateRef: Component<unknown, Record<string, Context<Data, Functions>>>;
+    stateRef: Component<unknown, unknown>;
     children: React.ReactNode;
   }>;
-  init: (
+  init: <State,>(
     stateRef: Component<
     unknown,
-    Record<string, Context<Data, Functions>>
+    State
     >,
     initialValuesOverride?: Partial<Data>,
   ) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  withCtx: (compo: React.ComponentClass<any>, passStatics?: Array<string>) =>
-  React.ForwardRefExoticComponent<React.RefAttributes<Component>>;
+  withCtx: <Props,>(
+    compo: React.ComponentType<Props & CtxProp>, passStatics?: Array<string>,
+  ) => React.ForwardRefExoticComponent<React.PropsWithoutRef<
+  Omit<Props, keyof CtxProp>> & React.RefAttributes<React.ComponentType<Omit<Props, keyof CtxProp>>
+  >>;
 }
 
 /**
@@ -207,12 +230,13 @@ export interface StateContext<
  */
 const createContextState = <
   Data,
-  Functions
+  Functions,
+  CtxProp extends {[key in keyof CtxProp]: Context<Data, Functions>},
 >(
   name: string,
   initialValues: Data,
   functionsToBindDef?: Record<keyof Functions, Function>,
-): StateContext<Data, Functions> => {
+): StateContext<Data, Functions, CtxProp> => {
   const functionsToBind = functionsToBindDef
     ? functionsToBindDef
     : {};
@@ -231,12 +255,12 @@ const createContextState = <
       context,
       contextStateName,
     ),
-    init: createInitFunction<Data, Functions>(
+    init: createInitFunction<Data, Functions, CtxProp>(
       contextStateName,
       initialValues,
       functionsToBindDef,
     ),
-    withCtx: createWithCtx<Data, Functions>(
+    withCtx: createWithCtx<Data, Functions, CtxProp>(
       context,
       contextStateName,
     ),
