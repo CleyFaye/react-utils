@@ -42,7 +42,7 @@
     "typescript": "^5.3.3"
   },
   "peerDependencies": {
-    "react": "17.x || 18.x"
+    "react": ">=17"
   },
   "files": [
     "lib/**/*.js",
